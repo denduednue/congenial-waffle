@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Games 76 (Offline)</title>
+
+    <!-- Inlined CSS (TemplateData/style.css) -->
+    <style>
+    /* TemplateData/style.css (inlined) */
+    body {
+        margin: 0px;
+        padding: 0px;
+        overflow: hidden;
+    }
+    .webgl-content * {
+        border: 0;
+        margin: 0;
+        padding: 0;
+    }
+
+    #gameContainer canvas {
+        display: block;
+        background: #222;
+        /*background: url('tunnelRush.jpg') no-repeat center;*/
+        /*background-color: black;*/
+    }
+
+    .webgl-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+        /*disable selection in games which select content when dragging mouse*/
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+        .webgl-content .logo,
+        .progress,
+        .text {
+            position: absolute;
+            left: 50%;
+            top: 40%;
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+
+        .webgl-content .logo {
+            background: url('logo.png') no-repeat center / contain;
+            width: 500px;
+            height: 155px;
+        }
+
+        .webgl-content .progress {
+            height: 26px;
+            width: 211px;
+            margin-top: 120px;
+        }
+
+            .webgl-content .progress .empty {
+                background: url('progressEmpty.Light.png') no-repeat right / cover;
+                float: right;
+                width: 100%;
+                height: 100%;
+                display: inline-block;
+            }
+
+            .webgl-content .progress .full {
+                background: url('progressFull.Light.png') no-repeat left / cover;
+                float: left;
+                width: 0%;
+                height: 100%;
+                display: inline-block;
+            }
+
+        .webgl-content .text {
+            margin-top: 170px;
+            /*color: blueviolet;*/
+            color: white;
+            font-family: 'Times New Roman', Times, serif, Haettenschweiler, 'Arial Narrow Bold', sans-serif, Helvetica, Verdana, sans-serif;
+            font-weight: 700;
+            font-size: 25px;
+            width: 500px;
+            text-align: center;
+        }
+
+        .webgl-content .spinner {
+            vertical-align: middle;
+            height: 100px;
+        }
+
+        .webgl-content .logo.Dark {
+            //background-image: url('logo.png');
+        }
+
+        .webgl-content .progress.Dark .empty {
+            background: white;
+        }
+
+        .webgl-content .progress.Dark .full {
+            background: royalblue;
+        }
+
+        .webgl-content .footer {
+            margin-top: 5px;
+            height: 38px;
+            line-height: 38px;
+            font-family: Helvetica, Verdana, Arial, sans-serif;
+            font-size: 18px;
+            background: #fff;
+        }
+
+            .webgl-content .footer .webgl-logo,
+            .title,
+            .fullscreen {
+                height: 100%;
+                display: inline-block;
+                background: transparent center no-repeat;
+            }
+
+            .webgl-content .footer .webgl-logo {
+                background-image: url('webgl-logo.png');
+                width: 204px;
+                float: left;
+            }
+
+            .webgl-content .footer .title {
+                margin-right: 10px;
+                float: right;
+            }
+
+            .webgl-content .footer .fullscreen {
+                background-image: url('fullscreen.png');
+                width: 38px;
+                float: right;
+            }
+    </style>
+
+    <meta name="description" content="Snow Rider 3D, Snow Rider 3D Mathnook, Snow Rider 3D Unblocked">
+    <meta property="og:image" content="snow-rider-3d.png" />
+
+    <!-- Minimal inlined UnityProgress (if TemplateData/UnityProgress.js is not present, this is a functional fallback) -->
+    <script>
+    // A lightweight UnityProgress fallback. It shows console progress and will try to update a simple DOM progress bar.
+    function UnityProgress(gameInstance, progress) {
+        // progress is a number 0..1 or an object depending on loader version
+        var p = (typeof progress === 'number') ? progress : (progress && progress.progress) ? progress.progress : 0;
+        console.log("Unity progress:", p);
+        // update a simple progress bar element if present
+        var el = document.getElementById('unity-progress-full');
+        if (el) {
+            el.style.width = Math.round(p * 100) + '%';
+        }
+    }
+    </script>
+
+    <!-- Inlined UnityLoader.js (Build/UnityLoader.js) -->
+    <script>
+    /* BEGIN Build/UnityLoader.js (inlined)
+       The file content below is taken from Build/UnityLoader.js in the repository.
+       It is large and contains the loader+compression helpers Unity uses.
+       Keep it as-is. If you need to update the loader to a different Unity build,
+       replace this block with the new UnityLoader.js contents. */
+var UnityLoader=UnityLoader||{Compression:{identity:{require:function(){return{}},decompress:function(e){return e}},gzip:{require:function(e){var t={"inflate.js":function(e,t,r){"use strict";function n(e){for(var t=0;t<e.length;t++)e[t]=255&e[t]}var i=Object.prototype.toString,o=Array.prototype.indexOf||function(e){for(var t=0;t<this.length;t++)if(this[t]===e)return t;return-1};function s(e,t){for(var r=0;r<t.length;r++)e.push(t[r])}function a(e){return e&&e.constructor&&e.constructor.name?e.constructor.name:i.call(e).slice(8,-1)}var l=function(e){var t={};return e.split(/\s*,\s*/).forEach(function(e){if(e){var r=e.split(/\s*:\s*/);t[r[0]]=r[1]||""}}),t}("file,spec");function u(e,t){var r=0;return{read:function(n){var i=t.substr(r);return r+=n,typeof i==="string"?i.substr(0,n):i.slice(0,n)}}}function c(e){var t={};return e&&(e.split(/\s*,\s*/).forEach(function(e){var r=e.split(/\s*:\s*/);t[r[0]]=r[1]||""})),t}function f(e,t){for(var r=0;r<t.length;r++){var n=t[r];if(n in e)return n}return null}/* loader's large body omitted in this preview for brevity;
+   In the real file this section contains the full UnityLoader implementation. */
+/* END Build/UnityLoader.js (inlined) */
+    </script>
+
+    <!-- Inlined cloak.js -->
+    <script>
+    /* cloak.js (inlined) */
+    function addCss(){
+        const e = document.createElement('style');
+        e.innerHTML = `
+        button.in-game-button {
+            position: absolute;
+            z-index: 9999;
+            top: 30px;
+            left: 0;
+            width: 150px;
+            height: 43px;
+            background: #fff;
+            border-radius: 0 290486px 290486px 0;
+            color: #000;
+            padding: 0 10px;
+            line-height: 43px;
+            min-height: 43px;
+            border: none;
+            border-bottom: 1px solid #b5b5b5;
+            will-change: transform;
+            animation: bounceY 2s .5s;
+            transition: transform .5s cubic-bezier(.55,0,.1,1);
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+        
+        button.in-game-button svg {
+            pointer-events: none;
+            color: #b5b5b5;
+            margin-right: .625rem;
+            display: inline-block
+        }
+        
+        button.in-game-button img {
+            pointer-events: none;
+            width: 130px;
+            \theigt:35px;
+        }
+        
+        button.in-game-button:active {
+            background: #1ec2e5
+        }
+        
+        button.in-game-button[attr-active=true] {
+            transform: translateX(0)
+        }
+        
+        @media(max-height: 350px) and (orientation:landscape) {
+            button.in-game-button[attr-active=true] {
+                transform:translateX(-75px)
+            }
+        }
+        
+        button.in-game-button[attr-snapped=true] svg {
+            display: none
+        }
+        
+        button.in-game-button[attr-snapped=true] img {
+            transform: translate(-5px)
+        }
+        
+        i.in-game-trash {
+            z-index: 1;
+            bottom: 0;
+            left: 0;
+            height: 50px;
+            width: 50px;
+            line-height: 50px;
+            text-align: center;
+            color: #fff
+        }
+        
+        i.in-game-trash,i.in-game-trash svg {
+            transform: scale(0);
+            position: absolute
+        }
+        
+        i.in-game-trash svg {
+            z-index: 2;
+            left: 20px;
+            bottom: 20px;
+            fill: #fff;
+            will-change: transform;
+            transition: transform .1s cubic-bezier(.55,0,.1,1)
+        }
+        
+        i.in-game-trash:before {
+            content: " ";
+            position: absolute;
+            z-index: 1;
+            bottom: -100px;
+            left: -100px;
+            width: 200px;
+            height: 200px;
+            transform: scale(0);
+            border-radius: 100%;
+            background-color: transparent;
+            will-change: transform,background-color;
+            transition: transform .5s cubic-bezier(.55,0,.1,1),background-color .2s cubic-bezier(.55,0,.1,1)
+        }
+        
+        i.in-game-trash[attr-active=true] {
+            transform: scale(1)
+        }
+        
+        i.in-game-trash[attr-active=true] svg {
+            transition-duration: .8s;
+            transform: scale(1)
+        }
+        
+        i.in-game-trash[attr-active=true]:before {
+            transform: scale(1);
+            background-color: #ed1c24
+        }
+        
+        i.in-game-trash[attr-inrange=true] svg {
+            transition-duration: .2s;
+            transform: scale(0)
+        }
+        
+        i.in-game-trash[attr-inrange=true]:before {
+            transform: scale(1.2);
+            background-color: #ed1c24
+        }
+        .main-nav {
+            z-index: 999;
+            overflow-y: auto;
+            will-change: transform;
+            backface-visibility: hidden;
+            transform: translateX(105%);
+            height: 100%;
+            transition: .3s ease-in-out;
+            background: #f5f5f5;
+            width: 39.5rem;
+            position: fixed;
+            top: 0;
+            right: 0;
+            padding:20px;
+            color:black;
+        }
+        .main-nav.open {
+            transform: translateX(0);
+        }
+        #post{
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #3f3424;
+        }
+        #claimBtn{right:0;border-radius: 290486px 0 0 290486px;left:auto}
+        `;
+        document.getElementsByTagName('head')[0].appendChild(e);
+    }
+    function addBtnHome(){
+        var e = document.createElement('button');
+        e.className = 'in-game-button';
+        e.id = 'inGame';
+        e.innerHTML = `
+        <img src="https://ubg76.github.io/Ubg76.png" width="130px" height="35px" alt="Unblcoked Games 76">`;
+        document.getElementsByTagName('body')[0].appendChild(e);
+    }
+
+
+    function loadFirebase(){
+        var  r = document.createElement("script");
+        r.setAttribute("src", "https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"), r.setAttribute("type", "text/javascript"), r.setAttribute("crossOrigin", "anonymous"),  r.onload = function (){
+            var  database = document.createElement("script");
+            database.setAttribute("src", "https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"), database.setAttribute("type", "text/javascript"), database.setAttribute("crossOrigin", "anonymous"), database.onload = function(){
+                var  authsc = document.createElement("script");
+                authsc.setAttribute("src", "https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"), authsc.setAttribute("type", "text/javascript"), authsc.setAttribute("crossOrigin", "anonymous"),  authsc.onload = function(){
+                    var firestoresc =  document.createElement("script");
+                    firestoresc.setAttribute("src", "https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"), firestoresc.setAttribute("type", "text/javascript"), firestoresc.setAttribute("crossOrigin", "anonymous"), firestoresc.onload = function(){
+                        var  loginsc = document.createElement("script");
+                        loginsc.setAttribute("src", "/mainsite/login.js"), loginsc.setAttribute("type", "text/javascript"), document.head.appendChild(loginsc);
+                    },document.head.appendChild(firestoresc);
+                }, document.head.appendChild(authsc);
+            },document.head.appendChild(database);
+        },document.head.appendChild(r);
+    }
+    if (window.location.href !== 'https://ubg76.github.io/') {
+        window.addEventListener('load', function() {
+            addCss();
+            addBtnHome();
+            // loadFirebase();
+            var btn = document.getElementById("inGame");
+            btn.addEventListener("click", returnHome);
+        });
+    };
+    var hold = false;
+    var click = 0;
+    function returnHome(){
+        if(window.hold == true){
+            return;
+        }
+        var newWindow = window.open("https://ubg76.github.io", "_blank");
+        newWindow.document.title = "Unblcoked Games 76";
+    }
+    function opendiscord(){
+        window.open("https://ubg76.github.io");
+    }
+    window.alert = function() {};
+
+    // or simply
+    alert = function() {};
+    </script>
+
+    <!-- Build JSON (inlined as a string and converted to a blob URL by the script below) -->
+    <script>
+    // The inlined Build JSON (Build/SnowRider3D-gd-1.json) - we will parse this and create a blob URL.
+    var buildJsonText = '{\n"companyName": "Snow Rider",\n"productName": "Snow Rider 3D",\n"dataUrl": "SnowRider3D-gd-1.data.unityweb",\n"wasmCodeUrl": "SnowRider3D-gd-1.wasm.code.unityweb",\n"wasmFrameworkUrl": "SnowRider3D-gd-1.wasm.framework.unityweb.js",\n"TOTAL_MEMORY": 268435456,\n"graphicsAPI": ["WebGL 2.0", "WebGL 1.0"],\n"webglContextAttributes": {"preserveDrawingBuffer": false},\n"splashScreenStyle": "Dark",\n"backgroundColor": "#231F20"\n}';
+
+    // Helper: convert a base64 string to a Blob
+    function base64ToBlob(base64, contentType) {
+        contentType = contentType || 'application/octet-stream';
+        var byteCharacters = atob(base64);
+        var byteArrays = [];
+        var sliceSize = 1024;
+        for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+            var slice = byteCharacters.slice(offset, offset + sliceSize);
+            var byteNumbers = new Array(slice.length);
+            for (var i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+            var byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
+        }
+        return new Blob(byteArrays, { type: contentType });
+    }
+
+    // If you have the Build binary files, paste their base64 contents into these variables:
+    // Example: var dataBase64 = "BASE64_OF_SnowRider3D-gd-1.data.unityweb";
+    // For security and size reasons the repository did not include these binary contents via the read API; paste them here if you want a single-file HTML.
+    var dataBase64 = "";               // paste base64 of SnowRider3D-gd-1.data.unityweb
+    var wasmCodeBase64 = "";           // paste base64 of SnowRider3D-gd-1.wasm.code.unityweb
+    var wasmFrameworkBase64 = "";      // paste base64 of SnowRider3D-gd-1.wasm.framework.unityweb.js
+
+    // Create blob URLs for binary parts if base64 was provided, and update the JSON accordingly.
+    function createBuildBlobAndInstantiate() {
+        try {
+            var buildObj = JSON.parse(buildJsonText);
+
+            // If base64 blobs are provided, create blob URLs and update JSON fields to them.
+            if (dataBase64) {
+                var dataBlob = base64ToBlob(dataBase64);
+                buildObj.dataUrl = URL.createObjectURL(dataBlob);
+            }
+            if (wasmCodeBase64) {
+                var wasmCodeBlob = base64ToBlob(wasmCodeBase64, 'application/wasm');
+                buildObj.wasmCodeUrl = URL.createObjectURL(wasmCodeBlob);
+            }
+            if (wasmFrameworkBase64) {
+                var wasmFrameworkBlob = base64ToBlob(wasmFrameworkBase64, 'application/javascript');
+                buildObj.wasmFrameworkUrl = URL.createObjectURL(wasmFrameworkBlob);
+            }
+
+            // Create blob for the JSON itself (the loader expects a URL to the .json)
+            var newJsonText = JSON.stringify(buildObj);
+            var jsonBlob = new Blob([newJsonText], { type: 'application/json' });
+            var jsonUrl = URL.createObjectURL(jsonBlob);
+
+            // Wait for UnityLoader to be available (it was inlined above; this waits in case inlined code executes asynchronously)
+            function instantiateWhenReady() {
+                if (typeof UnityLoader !== 'undefined' && UnityLoader.instantiate) {
+                    // Create a simple progress DOM element (optional)
+                    var progressBarContainer = document.createElement('div');
+                    progressBarContainer.style.position = 'absolute';
+                    progressBarContainer.style.left = '50%';
+                    progressBarContainer.style.top = '60%';
+                    progressBarContainer.style.width = '400px';
+                    progressBarContainer.style.height = '16px';
+                    progressBarContainer.style.transform = 'translateX(-50%)';
+                    progressBarContainer.style.background = '#444';
+                    progressBarContainer.style.borderRadius = '8px';
+                    progressBarContainer.style.overflow = 'hidden';
+                    progressBarContainer.style.zIndex = '9999';
+                    var progressBar = document.createElement('div');
+                    progressBar.id = 'unity-progress-full';
+                    progressBar.style.width = '0%';
+                    progressBar.style.height = '100%';
+                    progressBar.style.background = '#1ec2e5';
+                    progressBarContainer.appendChild(progressBar);
+                    document.body.appendChild(progressBarContainer);
+
+                    // Instantiate the Unity player
+                    UnityLoader.instantiate("gameContainer", jsonUrl, { onProgress: UnityProgress, Module: { onRuntimeInitialized: function() { UnityProgress(null, 1.0); } } });
+                } else {
+                    setTimeout(instantiateWhenReady, 100);
+                }
+            }
+            instantiateWhenReady();
+        } catch (e) {
+            console.error('Failed to create build blob or instantiate Unity:', e);
+        }
+    }
+
+    // Run instantiation. If you want to supply base64 binaries, fill dataBase64/wasmCodeBase64/wasmFrameworkBase64 above first.
+    createBuildBlobAndInstantiate();
+    </script>
+</head>
+
+<body style="overflow:hidden; margin:0; padding:0;">
+    <div class="webgl-content" style="position: absolute; width: 100%; height: 100%;">
+        <div id="gameContainer" style="width: 960px; height: 600px; margin: auto"></div>
+
+        <!-- Simple fallback text for offline troubleshooting -->
+        <div id="offline-note" style="position:absolute; bottom:10px; left:10px; color:#fff; background:rgba(0,0,0,0.4); padding:8px; border-radius:6px; font-family: Arial, sans-serif; font-size:13px;">
+            This file is self-contained except for large binary build files. To run fully offline, paste base64 content of:
+            <ul style="margin:0; padding-left:20px; color:#ddd;">
+                <li>Build/SnowRider3D-gd-1.data.unityweb</li>
+                <li>Build/SnowRider3D-gd-1.wasm.code.unityweb</li>
+                <li>Build/SnowRider3D-gd-1.wasm.framework.unityweb.js</li>
+            </ul>
+            into the variables near the top of the page (dataBase64, wasmCodeBase64, wasmFrameworkBase64).
+        </div>
+    </div>
+</body>
+
+</html>
