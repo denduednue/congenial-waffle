@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SnowRider3D (runtime loader)</title>
+  <style>
+    body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:#111; color:#eee; }
+    #unityContainer { width: 960px; height: 600px; margin: 24px auto; background: #000; display:flex; align-items:center; justify-content:center; position:relative; }
+    canvas { width:100%; height:100%; display:block; }
+    #progress { position:absolute; left:12px; right:12px; bottom:12px; height:14px; background: rgba(255,255,255,0.06); border-radius:7px; overflow:hidden; }
+    #progress > i { display:block; height:100%; width:0%; background:linear-gradient(90deg,#09f,#0ff); transition:width 0.12s linear }
+    #message { text-align:center; padding:8px 12px; font-size:14px; color:#bbb; }
+    #debug { width:960px; margin: 12px auto; padding:12px; background:#0b0b0b; color:#9dd; font-size:12px; white-space:pre-wrap; max-height:240px; overflow:auto; border-radius:6px; }
+    a { color: #6cf }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center;margin-top:18px">SnowRider3D — Runtime loader (raw GitHub)</h2>
+
+  <div id="unityContainer">
+    <canvas id="unityCanvas"></canvas>
+    <div id="progress"><i id="progressBar"></i></div>
+    <div id="message">Preparing runtime loader…</div>
+  </div>
+
+  <div style="width:960px;margin:8px auto;text-align:center;color:#ccc;font-size:13px">
+    This page will fetch the Unity build files directly from the repository's raw URLs at runtime so you don't need a local copy embedded in this HTML.
+    If you prefer a single self-contained file, let me know and I can produce that (it will be very large).
+  </div>
+
+  <div id="debug" aria-hidden="true" style="display:none"></div>
+
+  <script>
+  (async function(){
+    const owner = 'denduednue';
+    const repo = 'congenial-waffle';
+    const commit = '0d5334b31c57b64ec6c7c54145c2ea0934a2d3be';
+
+    const providers = [
+      // prefer raw first, but many embed contexts (about:srcdoc) block raw.githubusercontent access — fall back to githack and jsdelivr
+      `https://raw.githubusercontent.com/${owner}/${repo}/${commit}/Build/`,
+      `https://raw.githack.com/${owner}/${repo}/${commit}/Build/`,
+      `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${commit}/Build/`
+    ];
+
+    const log = (msg, level='info')=>{
+      const dbg = document.getElementById('debug');
+      dbg.style.display = 'block';
+      dbg.textContent += `[${new Date().toISOString()}] ${msg}\n`;
+      console[level] && console[level](msg);
+    };
+
+    const setMessage = (m) => { const el = document.getElementById('message'); if(el) el.textContent = m; };
+    const setProgress = (p) => { const bar = document.getElementById('progressBar'); if(bar) bar.style.width = (Math.round(p*100)) + '%'; };
+
+    async function tryFetchArrayBuffer(path) {
+      let lastErr = null;
+      for (const base of providers) {
+        const url = base + path;
+        try {
+          log('Attempting fetch: ' + url);
+          const resp = await fetch(url);
+          if (!resp.ok) throw new Error('HTTP ' + resp.status + ' when fetching ' + url);
+          return { buffer: await resp.arrayBuffer(), url };
+        } catch (err) {
+          lastErr = err;
+          log('Fetch failed for ' + url + ' — ' + (err && err.message ? err.message : err), 'warn');
+          // try next provider
+        }
+      }
+      throw lastErr;
+    }
+
+    try {
+      setMessage('Creating blob URLs for Unity build files (fetching from GitHub raw, fallback to githack/jsdelivr)...');
+      log('Starting runtime loader');
+
+      const filenames = {
+        loader: 'UnityLoader.js',
+        framework: 'SnowRider3D-gd-1.wasm.framework.unityweb.js',
+        code: 'SnowRider3D-gd-1.wasm.code.unityweb',
+        data: 'SnowRider3D-gd-1.data.unityweb'
+      };
+
+      // fetch code + data (largest) with provider fallbacks
+      setMessage('Fetching .wasm code and .data (these are large) — will try multiple CDNs if needed...');
+
+      const codeRes = await tryFetchArrayBuffer(filenames.code);
+      setProgress(0.25);
+      const dataRes = await tryFetchArrayBuffer(filenames.data);
+      setProgress(0.6);
+
+      log('Fetched code from ' + codeRes.url + ' and data from ' + dataRes.url);
+      const codeBlobUrl = URL.createObjectURL(new Blob([codeRes.buffer], { type: 'application/wasm' }));
+      const dataBlobUrl = URL.createObjectURL(new Blob([dataRes.buffer], { type: 'application/octet-stream' }));
+
+      window.Module = window.Module || {};
+      window.Module.locateFile = function(path, prefix) {
+        if (path.endsWith('.wasm.code.unityweb')) return codeBlobUrl;
+        if (path.endsWith('.data.unityweb')) return dataBlobUrl;
+        // fall back — try to resolve using the same provider order used above
+        for (const base of providers) {
+          const attempt = base + path;
+          // do not network-test here; return the first syntactically valid URL — the framework will fetch it.
+          return attempt;
+        }
+        return (prefix || '') + path;
+      };
+
+      // Load UnityLoader.js by trying providers until one loads OK
+      setMessage('Loading UnityLoader.js (loader script) — trying providers...');
+      let loaderLoaded = false;
+      for (const base of providers) {
+        const url = base + filenames.loader;
+        try {
+          await new Promise((resolve, reject)=>{
+            const s = document.createElement('script'); s.src = url; s.async = true;
+            s.onload = ()=> resolve();
+            s.onerror = ()=> reject(new Error('Failed to load ' + url));
+            document.head.appendChild(s);
+          });
+          log('Loaded UnityLoader from ' + url);
+          loaderLoaded = true;
+          break;
+        } catch (err) {
+          log(err.message || err, 'warn');
+        }
+      }
+      if (!loaderLoaded) throw new Error('Could not load UnityLoader.js from any provider. See debug log.');
+
+      setProgress(0.7);
+
+      // Fetch framework JS text (we'll execute it from a blob URL)
+      setMessage('Fetching framework JS (trying multiple providers)...');
+      let frameworkText = null; let frameworkUrlUsed = null;
+      for (const base of providers) {
+        const url = base + filenames.framework;
+        try {
+          const resp = await fetch(url);
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          frameworkText = await resp.text();
+          frameworkUrlUsed = url;
+          log('Fetched framework JS from ' + url);
+          break;
+        } catch (err) {
+          log('Framework fetch failed for ' + url + ' — ' + err.message, 'warn');
+        }
+      }
+      if (!frameworkText) throw new Error('Failed to fetch framework JS from all providers');
+
+      setProgress(0.85);
+      const frameworkBlobUrl = URL.createObjectURL(new Blob([frameworkText], { type: 'application/javascript' }));
+
+      await new Promise((resolve, reject)=>{
+        const s = document.createElement('script'); s.src = frameworkBlobUrl; s.async = true;
+        s.onload = ()=>{ log('Framework executed (from ' + frameworkUrlUsed + ')'); resolve(); };
+        s.onerror = (e)=>{ reject(new Error('Failed to execute framework JS')); };
+        document.head.appendChild(s);
+      });
+
+      setMessage('Initializing canvas and checking loader API...');
+      const canvas = document.getElementById('unityCanvas'); canvas.width = 960; canvas.height = 600;
+
+      if (window.Module && !window.Module.onRuntimeInitialized) {
+        window.Module.onRuntimeInitialized = function(){ log('Module runtime initialized'); };
+      }
+
+      if (typeof createUnityInstance === 'function') {
+        setMessage('Invoking createUnityInstance (modern loader) — watch progress bar.');
+        const config = {
+          dataUrl: filenames.data,
+          frameworkUrl: filenames.framework,
+          codeUrl: filenames.code,
+          streamingAssetsUrl: 'StreamingAssets',
+          companyName: 'Unknown', productName: 'SnowRider3D', productVersion: '1.0'
+        };
+        try {
+          const instance = await createUnityInstance(canvas, config, (prog)=>{ setProgress(prog); });
+          window.unityInstance = instance; setProgress(1); setMessage('Unity instance running.'); log('Unity started via createUnityInstance');
+          return;
+        } catch (err) {
+          log('createUnityInstance failed: ' + err, 'error');
+        }
+      }
+
+      if (window.UnityLoader && typeof UnityLoader.instantiate === 'function') {
+        setMessage('Calling UnityLoader.instantiate (legacy loader) — progress may appear.');
+        try {
+          UnityLoader.instantiate('unityContainer', filenames.data, { Module: window.Module, onProgress: function(c,p){ setProgress(p); } });
+          log('UnityLoader.instantiate called');
+          return;
+        } catch (err) {
+          log('UnityLoader.instantiate failed: ' + err, 'error');
+        }
+      }
+
+      setMessage('Framework injected. If nothing happened, open debug for messages or check the console.');
+      setProgress(1);
+
+    } catch (err) {
+      setMessage('Error while preparing runtime loader — see debug log below. ' + (err && err.message ? err.message : err));
+      log('Runtime loader error: ' + (err && err.stack ? err.stack : err), 'error');
+      console.error(err);
+    }
+  })();
+  </script>
+</body>
+</html>
